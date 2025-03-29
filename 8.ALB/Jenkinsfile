@@ -15,14 +15,10 @@ pipeline {
         choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Select the action for terraform')
     }
     stages {
-
-            // its better not to put apply here for obvious reasons ; this can be used only to check its ability to create infra.
-            // when jenkins clones the repo , it will in main page , cd vpc will  take to vpc infra
-            
         stage('init and plan') { 
                 steps {
                     withAWS(region: 'us-east-1', credentials: 'aws-cred')
-                    sh 'cd 1.VPC' 
+                    sh 'cd 8.ALB' 
                     sh 'terraform init -reconfigure'
                     sh 'terraform plan -out expensetf'
                 }      
@@ -31,7 +27,7 @@ pipeline {
                 steps {     
                     withAWS(region: 'us-east-1', credentials: 'aws-cred')
                     sh """
-                    cd 1.VPC
+                    cd 8.ALB
                     if [ ${params.ACTION} == apply ]
                     then
                         terraform apply -auto-approve expensetf
@@ -41,15 +37,7 @@ pipeline {
                     """
                 }
             }
-        stage('triggering SG') {
-            when {
-                expression{ params.ACTION =='apply' }
-            }
-                steps {     
-                    build job: 'SG', parameters: [string(name: 'ACTION', value: 'apply')] wait:false
-                }
-            }   
-        }
+    }
     post {
         always {
             echo "this section always runs" 

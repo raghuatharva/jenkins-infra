@@ -15,14 +15,10 @@ pipeline {
         choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Select the action for terraform')
     }
     stages {
-
-            // its better not to put apply here for obvious reasons ; this can be used only to check its ability to create infra.
-            // when jenkins clones the repo , it will in main page , cd vpc will  take to vpc infra
-            
         stage('init and plan') { 
                 steps {
                     withAWS(region: 'us-east-1', credentials: 'aws-cred')
-                    sh 'cd 1.VPC' 
+                    sh 'cd 9.CDN' 
                     sh 'terraform init -reconfigure'
                     sh 'terraform plan -out expensetf'
                 }      
@@ -31,7 +27,7 @@ pipeline {
                 steps {     
                     withAWS(region: 'us-east-1', credentials: 'aws-cred')
                     sh """
-                    cd 1.VPC
+                    cd 9.CDN
                     if [ ${params.ACTION} == apply ]
                     then
                         terraform apply -auto-approve expensetf
@@ -41,15 +37,28 @@ pipeline {
                     """
                 }
             }
-        stage('triggering SG') {
+        stage('Destroy'){
             when {
-                expression{ params.ACTION =='apply' }
+                expression { params.ACTION == 'destroy' }
             }
-                steps {     
-                    build job: 'SG', parameters: [string(name: 'ACTION', value: 'apply')] wait:false
+            steps{
+                withAWS(region: 'us-east-1', credentials: 'aws-cred') {
+                    script {
+                        def directories = ['9.CDN', '8.ALB', '7.ACM', '6.ECR', '5.RDS', '4.EKS', '3.Bastion', '2.SG', '1.VPC']
+                        for (dir in directories) {
+                            echo "Destroying resources in directory: ${dir}"
+                            sh """
+                            cd ${dir}
+                            terraform init -reconfigure
+                            terraform destroy -auto-approve || { echo "Failed to destroy resources in ${dir}"; exit 1; }
+                            cd ..
+                            """
+                        }
+            }
                 }
-            }   
+            }
         }
+    }
     post {
         always {
             echo "this section always runs" 

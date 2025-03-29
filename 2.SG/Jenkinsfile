@@ -1,6 +1,6 @@
 // paremeters are nothing but varaiables.tf in terraform
 // ansiColor('xterm') --> coloring pluggin
-// wait:false means here , sg creation complete aagovargu vpc build mugibeka bedva antha, and if sg build fails , vpc also fails ; since vpc doesnt depend on sg wait is fals ; by default its true
+// wait:false means here , sg creation complete aagovargu vpc build mugibeka bedva antha, and if sg build fails , vpc also fails ; since vpc doesnt depend on sg wait is false ; by default its true
 
 pipeline {
     agent {
@@ -37,23 +37,56 @@ pipeline {
                     """
                 }
             }
-        stage('parallel build') {
+        stage('parallel build') { // parallel build will build all at once since they havent dependent on each other
             when {
                 expression{ params.ACTION =='apply' }
             }
             parallel{
                 stage('bastion') {
                     steps {     
-                        build job: '3.Bastion', parameters: [string(name: 'ACTION', value: 'apply')] wait:false
+                        build job: 'Bastion', parameters: [string(name: 'ACTION', value: 'apply')] wait:false
                     }
                 } 
                 stage('eks') {
                     steps {     
-                        build job: '4.EKS', parameters: [string(name: 'ACTION', value: 'apply')] wait:false
+                        build job: 'EKS', parameters: [string(name: 'ACTION', value: 'apply')] wait:false
                     }
                 } 
+                stage('rds') {
+                    steps {
+                        build job: 'RDS', parameters: [string(name: 'ACTION', value: 'apply')] wait: false
+                    }
+                }
+                stage('ecr') {
+                    steps {
+                        build job: 'ECR', parameters: [string(name: 'ACTION', value: 'apply')] wait: false
+                    }
+                }
             }   
         }
+        stage('sequential build') {
+            when{
+                expression{ params.ACTION =='apply' }  
+            }
+            sequential{
+                stage('acm') {
+                    steps{
+                        build job: 'ACM', parameters: [string(name: 'ACTION', value: 'apply')] wait: true 
+                        // by default wait: true ; no need to mention
+                    }
+                }
+                 stage('alb') {
+                    steps {
+                        build job: 'ALB', parameters: [string(name: 'ACTION', value: 'apply')] wait: false
+                    }
+                }
+                stage('cdn') {
+                    steps {
+                        build job: 'CDN', parameters: [string(name: 'ACTION', value: 'apply')] wait: false
+                    }
+                }
+            }
+        } 
     }
     post {
         always {

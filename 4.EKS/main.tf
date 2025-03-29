@@ -12,7 +12,9 @@
 
 resource "aws_key_pair" "eks" {
   key_name   = "openvpn_rsa"  #just using some key which i created earlier , vpn key ನೆ ಬೇಕಂತಿಲ್ಲ 
-  public_key = file("/Users/apple/.ssh/openvpn_rsa.pub")
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVngBkXEDHrIRuFQYHDJLgzC9bTUF4VjAxjYAXsu0AJ1LoWzYtSSnhlq0Pbfjayxl1nG42vGuDNwhAgwE7sPQV6SAp6cnrxD1EtON7uFmlUlc5fr7bG6r3BeEJ1Ofvn+uzFLGoFYgS/W24QLZL22xXV8VShq3XTBniBE5pLk3qPdr2I9GF5xZx3AwujySe9qziwe3UBat8vZEE5hXA/H8DulvxXnO9TLS0C2poOcVR0E4mNG7fjUPGzKsHC6ZQN2T+2Yz0v4eCXwIkwBdHWziSSKjs4WtKYxWcrSLXkmDENs+1HTLzcimbeyu1XMc2mf3lT8yS8QOrw4A186VjP9/1 apple@Rohans-iMac.local"
+  # public_key = file("/Users/apple/.ssh/openvpn_rsa.pub")
+
 }
 
 module "eks" {
