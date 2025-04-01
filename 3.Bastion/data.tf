@@ -1,23 +1,11 @@
+data "aws_ami" "join_devops" {
+  most_recent = true
+  owners      = ["973714476881"]
 
-data "aws_ami" "openvpn" {
-
-	most_recent      = true
-	owners = ["679593333241"]
-	
-	filter {
-		name   = "name"
-		values = ["OpenVPN Access Server Community Image-fe8020db-*"]
-	}
-	
-	filter {
-		name   = "root-device-type"
-		values = ["ebs"]
-	}
-
-    filter {
-        name   = "virtualization-type"
-        values = ["hvm"]
-    }
+  filter {
+    name   = "name"
+    values = ["RHEL-9-DevOps-Practice"] #this is case sensitive , so use it properly as is
+  }
 }
 
 data "aws_ssm_parameter" "public_subnet_id" {

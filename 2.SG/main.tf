@@ -1,6 +1,6 @@
 # security groups required for the project
 
-module "eks_control_plance_sg" {
+module "eks_control_plane_sg" {
   source       = "git::https://github.com/raghuatharva/terraform-aws-security-group.git?ref=main"
   vpc_id       = local.vpc_id
   sg_name      = "control plane "
@@ -89,6 +89,15 @@ resource "aws_security_group_rule" "web_alb_https" {
   security_group_id = module.web_alb_sg.id
 }
 
+resource "aws_security_group_rule" "web_alb_http" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = module.web_alb_sg.id
+}
+
 resource "aws_security_group_rule" "web_alb_to_node" {
   type              = "ingress"
   from_port         = 30000
@@ -127,7 +136,7 @@ resource "aws_security_group_rule" "bastion_to_eks_control_plane" {
 }
 
 # for nodes to communicate with each other , allow node group sg inside node group sg
-resource "aws_security_group_rule" "node_vpc" {
+resource "aws_security_group_rule" "node_to_other_node" {
   type              = "ingress"
   from_port         = 0
   to_port           = 0
@@ -147,8 +156,8 @@ resource "aws_security_group_rule" "bastion_to_node" {
 
 resource "aws_security_group_rule" "bastion_to_mysql" {
   type              = "ingress"
-  from_port         = 22
-  to_port           = 22
+  from_port         = 3306
+  to_port           = 3306
   protocol          = "tcp"
   source_security_group_id       = module.bastion_sg.id
   security_group_id = module.mysql_sg.id

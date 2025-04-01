@@ -59,6 +59,7 @@ VALIDATE $? "kubectl installation"
 
 # # kubens
 git clone https://github.com/ahmetb/kubectx /opt/kubectx
+rm -rf /usr/local/bin/kubens
 ln -s /opt/kubectx/kubens /usr/local/bin/kubens
 VALIDATE $? "kubens installation"
 
@@ -72,8 +73,8 @@ source ~/.bashrc
 VALIDATE $? "helm installation"
 
 #k9s
-curl -sS https://webinstall.dev/k9s | bash
-VALIDATE $? "k9s installation"
+# curl -sS https://webinstall.dev/k9s | bash
+# VALIDATE $? "k9s installation"
 
 #ebs-csi-driver
 kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.40"
@@ -88,3 +89,4 @@ VALIDATE $? "EFS CSI driver installation"
 #mysql client to connect rds 
 sudo dnf install mysql -y
 
+mysql -h mysql-dev.rohanandlife.site -u root -p ExpenseApp@1 < /path/to/your/schema.sql
