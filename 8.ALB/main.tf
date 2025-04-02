@@ -73,6 +73,7 @@ resource "aws_lb_target_group" "frontend" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = local.vpc_id
+  target_type = "ip"    #THIS IS THE MOST IMPORTANT THING FOR TARGET GROUP BINDING;
   
   health_check {
     healthy_threshold = 4
@@ -88,7 +89,7 @@ resource "aws_lb_target_group" "frontend" {
 }
 
 resource "aws_lb_listener_rule" "target_group_routing" {
-  listener_arn = local.web_alb_listener_https
+  listener_arn = aws_lb_listener.web_https.arn
   priority     = 1 # lesser the number , the priority for this rule increases
 
   action {
